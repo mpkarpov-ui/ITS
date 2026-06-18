@@ -1,0 +1,13 @@
+[project]
+name = "its-core"
+version = "0.1.0"
+description = "ITS core - process supervisor, plugin loader, bus client."
+requires-python = ">=3.11"
+dependencies = ["rich", "fastapi", "uvicorn", "nats-py", "websockets", "watchfiles", "psutil"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/its_core"]

@@ -1,0 +1,13 @@
+id = "its-console"
+version = "0.1.0"
+description = "In-browser terminal for shell stations. Constrained `its` mode by default; full shell mode when the station has --allow-exec. Pops out into its own window for multi-monitor launch ops."
+
+[ui]
+entry = "ui/index.tsx"
+icon = "terminal"
+
+[[ui.mounts]]
+target = "tab"
+component = "ConsoleView"
+route = "/console"
+title = "Console"

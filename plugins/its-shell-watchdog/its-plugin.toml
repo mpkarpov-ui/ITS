@@ -1,0 +1,14 @@
+id = "its-shell-watchdog"
+version = "0.1.0"
+description = "Server-side watcher for shell heartbeats. Fires a sticky warn alert when a shell goes stale (3s without a heartbeat) and escalates to error when it drops (10s+). Clears the alert when the shell starts heartbeating again."
+
+[runtime]
+kind = "subprocess"
+entry = "src/its_shell_watchdog/main.py"
+
+# Publishes alerts on its own subject (its.its-shell-watchdog.<inst>.alert).
+# Uses the shared Alert schema from its-alerts via a one-line re-export in
+# the local schemas/alert.py - codegen processes its-alerts first via
+# topological dep ordering, so the import resolves.
+[[publishes]]
+stream = "alert"

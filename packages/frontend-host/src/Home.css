@@ -1,0 +1,88 @@
+/* Home styles inline styles can't express (@keyframes). Alert rows take their
+   layout inline in Home.tsx and add home-alert + home-alert-<level> for the
+   per-severity background below. Urgency escalates by background only: info
+   calm, warn amber wash, error slow pulse, critical faster pulse + glow. */
+
+.home-alert {
+  background: var(--surface-2);
+  border-radius: 4px;
+  transition: background-color 200ms ease;
+}
+
+/* warn: static amber wash. */
+.home-alert-warn {
+  background: color-mix(in srgb, var(--status-stale) 16%, var(--surface-2));
+}
+
+/* error: slow red background pulse. */
+.home-alert-error {
+  animation: home-alert-error-pulse 1.6s ease-in-out infinite;
+}
+@keyframes home-alert-error-pulse {
+  0%,
+  100% {
+    background-color: color-mix(in srgb, var(--status-error) 12%, var(--surface-2));
+  }
+  50% {
+    background-color: color-mix(in srgb, var(--status-error) 30%, var(--surface-2));
+  }
+}
+
+/* critical: brighter + faster pulse, with an outer glow at the peak. */
+.home-alert-critical {
+  animation: home-alert-critical-pulse 0.85s ease-in-out infinite;
+}
+@keyframes home-alert-critical-pulse {
+  0%,
+  100% {
+    background-color: color-mix(in srgb, var(--status-error) 26%, var(--surface-2));
+    box-shadow: 0 0 0 transparent;
+  }
+  50% {
+    background-color: color-mix(in srgb, var(--status-error) 55%, var(--surface-2));
+    box-shadow: 0 0 12px color-mix(in srgb, var(--status-error) 45%, transparent);
+  }
+}
+
+/* Per-row clear button (right edge of each alert). */
+.home-alert-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: color 120ms ease, background-color 120ms ease, opacity 120ms ease;
+}
+.home-alert-clear:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 14%, transparent);
+  opacity: 1;
+}
+
+/* Square icon button for panel header actions (e.g. the create-alert bell). */
+.home-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.home-icon-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}

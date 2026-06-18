@@ -1,0 +1,509 @@
+/* Added to <body> while Overlay is mounted: overrides the host's dark theme
+   so OBS composites the overlay onto the live video feed. */
+body.iss-live-overlay-host {
+  background: transparent !important;
+}
+body.iss-live-overlay-host .iss-live-overlay-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  font-family: 'Trebuchet MS', sans-serif;
+  color: #fff;
+  overflow: hidden;
+}
+
+/* Spot strip, passive timer, name tag, idle/sponsor/fun-facts screens, tilt
+   indicators. Ported verbatim from gss-frontend StreamCommon.css; do not
+   retheme, this is video content not operator chrome (feedback_overlay_style). */
+
+.spot-overlay {
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 0%, rgba(0,0,0,1) 1%, rgba(0,0,0,0.95) 10%, rgba(0,0,0,0.75) 35%, rgba(0, 0, 0, 0) 60%);
+  width: 200%;
+  height: 80%;
+  position: fixed;
+  top: 60%;
+  left: -50%;
+  z-index: -2;
+}
+
+.start-hidden { opacity: 0; }
+
+.spot-overlay-out { opacity: 1; animation: fadeOut 1s forwards; animation-delay: 0.1s; }
+.overlay-row-out { opacity: 1; animation: fadeOut 1s forwards; }
+.spot-overlay-in { animation: fadeIn 1s forwards; }
+.overlay-row-in { animation: fadeIn 1.5s forwards; animation-delay: 0.5s; }
+.generic-fade-in { animation: fadeIn 1s forwards; }
+.generic-fade-out { opacity: 1; animation: fadeOut 1s forwards; }
+
+.target-title-fade-in { animation: fadeIn 1s forwards; animation-delay: 0.5s; }
+.target-spot-fade-in { animation: fadeIn 1s forwards; }
+.target-spot-fade-out { opacity: 1; animation: fadeOut 2s forwards; animation-delay: 0.5s; }
+.target-title-fade-out { opacity: 1; animation: fadeOut 1.5s forwards; }
+.target-subtitle-fade-in { animation: fadeIn 1s forwards; animation-delay: 1s; }
+.target-subtitle-fade-out { opacity: 1; animation: fadeOut 1.5s forwards; }
+
+.stream-target-wrapper {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 30px;
+  display: flex;
+  flex-flow: column nowrap;
+  border-radius: 10px;
+  padding: 10px;
+}
+.stream-target-desc-title {
+  font-size: 1.75em;
+  font-family: 'Trebuchet MS', sans-serif;
+}
+.stream-target-desc-subtitle {
+  color: #ccc;
+  font-size: 1.25em;
+  font-family: 'Trebuchet MS', sans-serif;
+}
+.stream-target-dim-overlay {
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 0%, rgba(0,0,0,1) 1%, rgba(0,0,0,0.95) 10%, rgba(0,0,0,0.75) 35%, rgba(0, 0, 0, 0) 60%);
+  width: 150%;
+  height: 75%;
+  position: fixed;
+  top: 65%;
+  left: -75%;
+  z-index: -2;
+}
+
+@keyframes fadeIn { to { opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; } }
+
+.overlay-position-bottom {
+  height: 100%;
+  width: 100%;
+  justify-content: end;
+  display: flex;
+  flex-flow: column nowrap;
+  margin-bottom: 1em;
+}
+.overlay-row {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+.overlay-row-element {
+  margin: 10px;
+  font-size: 1.5em;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+}
+.overlay-row-group {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+  flex: 1 1 0;
+}
+
+.overlay-spot-timer-above-label {
+  color: #bbb;
+  text-align: center;
+  font-size: 1.25em;
+  white-space: pre;
+}
+.overlay-spot-timer-main {
+  font-weight: bold;
+  font-size: 2.25em;
+  text-align: center;
+}
+.overlay-spot-timer-paused {
+  animation: pulse-pause-stream 3s infinite;
+}
+@keyframes pulse-pause-stream {
+  0%, 100% { color: #dddd00; }
+  50% { color: #888800; }
+}
+
+.stream-passive-timer-wrapper {
+  position: absolute;
+  margin: 50px;
+  display: flex;
+  flex-flow: column nowrap;
+}
+.stream-passive-timer {
+  display: flex;
+  flex-flow: column nowrap;
+  text-align: center;
+}
+.stream-passive-timer-main {
+  font-size: 2.5em;
+  margin-left: 25px;
+  margin-right: 25px;
+}
+.stream-passive-timer-name {
+  font-size: 1.75em;
+  margin-left: 25px;
+  margin-right: 25px;
+}
+.stream-passive-timer-m-text { color: #a6a6a6; }
+.stream-passive-timer-sep {
+  height: 3px;
+  background-color: white;
+  position: relative;
+  width: 0%;
+  left: 50%;
+}
+.stream-passive-timer-sep-in { animation: growInSep 1s forwards; }
+.stream-passive-timer-sep-out {
+  width: 100%;
+  left: 0%;
+  padding-left: 10px;
+  padding-right: 10px;
+  animation: growOutSep 1s forwards;
+  animation-delay: 0.25s;
+}
+@keyframes growInSep {
+  to { width: 100%; left: 0%; padding-left: 10px; padding-right: 10px; }
+}
+@keyframes growOutSep {
+  to { width: 0%; left: 50%; padding-left: 0px; padding-right: 0px; }
+}
+.stream-passive-timer-hold-wrapper {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+.stream-passive-timer-hold {
+  background-color: #ccc;
+  padding: 5px 20px;
+  color: black;
+  margin-top: 25px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1.5em;
+}
+.stream-hide { display: none; }
+
+.overlay-row-telem-group { display: flex; flex-flow: row nowrap; }
+.overlay-row-telem-title {
+  display: flex;
+  margin-right: 15px;
+  flex-flow: column nowrap;
+}
+.overlay-row-telem-title-name {
+  color: white;
+  font-weight: bold;
+  font-size: 1.25em;
+}
+.overlay-row-telem-title-qty {
+  color: #ccc;
+  font-size: 0.9em;
+}
+.overlay-row-telem-main {
+  color: #fff;
+  font-size: 2em;
+  font-weight: bold;
+  white-space: pre;
+}
+.overlay-row-telem-unit {
+  color: #aaa;
+  font-size: 0.75em;
+  margin-left: 5px;
+  font-weight: bold;
+}
+.overlay-row-group-disabled * { color: #666; }
+.overlay-v-align {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+}
+
+.alt-text-no-gps-lock { color: #ffb8b8; }
+
+/* Tilt indicators: cross-hair plus rotating rocket silhouette SVG. */
+.overlay-tilt-wrapper {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+.overlay-tilt-hind {
+  position: absolute;
+  height: 1px;
+  width: 0%;
+  top: 50%;
+  z-index: -1;
+  left: 0%;
+  background-color: #888;
+}
+.overlay-tilt-vind {
+  position: absolute;
+  height: 0%;
+  width: 1px;
+  top: 0%;
+  z-index: -1;
+  left: 50%;
+  border-left: 1px dotted #aaa;
+}
+.tilt-hind-in { animation: drawin-h 2s forwards; animation-delay: 1s; }
+.tilt-vind-in { animation: drawin-v 1s forwards; animation-delay: 1s; }
+.tilt-hind-out { width: 100%; animation: fadeOut 1s forwards; }
+.tilt-vind-out { height: 50%; animation: fadeOut 1s forwards; }
+@keyframes drawin-h { to { width: 100%; } }
+@keyframes drawin-v { to { height: 50%; } }
+
+.svg-trace-line {
+  fill: #fff;
+  stroke: #fff;
+  stroke-miterlimit: 10;
+  stroke-width: 2px;
+}
+.svg-small { width: 100px; height: 100px; }
+.fade-in-delay { opacity: 0; animation: fadeIn 1s forwards; animation-delay: 2s; }
+.no-fade-out { opacity: 1; }
+.force-hide { opacity: 0; }
+
+/* Map overlay (?mode=map): the Cesium viewer fills the browser source. */
+.iss-map-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Pre / idle / goodbye interstitials (legacy port). Full-bleed mission photo,
+   translucent blurred side panel (left), headline + T-clock + subtitle, fun
+   facts in the middle, footer branding pinned to the bottom. The photo URL and
+   text come from the active format's idle_screen block; a solid dark cover
+   stands in when no photo is set. Base font-size is pinned so the em-scaled
+   panel renders the same regardless of host root size (legacy parity). */
+
+.stream-idle-photo-bg {
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  background-size: cover;
+  background-position: center;
+  font-size: 16px;
+}
+.stream-pre-text-wrap,
+.stream-idle-text-wrap {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  height: 100%;
+  text-align: center;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+}
+.stream-pre-text-wrap { width: 30%; }
+.stream-idle-text-wrap { width: 45%; }
+.stream-idle-timer {
+  font-size: 4em;
+  font-weight: bold;
+}
+.stream-idle-reason {
+  font-size: 1.5em;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.stream-idle-goodbye-text {
+  font-weight: normal;
+  margin-bottom: 25px;
+  width: 100%;
+}
+.stream-idle-mediahandle-wrap {
+  padding-left: 15px;
+  padding-right: 15px;
+  font-weight: normal;
+}
+.stream-idle-mediahandle {
+  margin-right: 15px;
+  font-weight: bold;
+  color: #ffaa00;
+}
+
+.stream-idle-title {
+  font-size: 5em;
+  font-weight: bold;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #7c0;
+  padding-top: 20px;
+}
+.stream-idle-subtext {
+  position: relative;
+  top: -20px;
+  font-size: 2em;
+}
+.stream-idle-footer {
+  padding-bottom: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.stream-idle-footer-t {
+  font-size: 3em;
+  color: #ccc;
+  font-weight: bold;
+}
+.stream-idle-footer-b {
+  font-size: 1.25em;
+  color: #888;
+  font-weight: bold;
+}
+.stream-idle-funfact-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+.stream-idle-funfact-facttitle { font-size: 1em; }
+.stream-idle-funfact-fact {
+  font-weight: normal;
+  font-size: 0.75em;
+  background-color: rgba(0, 0, 0, 0.35);
+  margin-right: 30px;
+  height: 4em;
+  margin-left: 30px;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+}
+.fact-out { opacity: 1; animation: fadeOut 2s forwards; }
+.fact-in { opacity: 0; animation: fadeIn 2s forwards; animation-delay: 0.1s; }
+.fact-single-large { font-size: 1.5em; }
+.fact-title-single-large { font-size: 1.75em; margin-top: 25px; }
+.funfact-center { text-align: center; }
+
+.sponsor-rotator {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 1rem;
+  position: relative;
+  width: 100%;
+  background-color: #777;
+}
+.sponsor-header {
+  font-size: 3.5rem;
+  font-weight: 600;
+  margin: 0 20px 0 0;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  font-family: 'Roboto', 'Trebuchet MS', sans-serif;
+}
+.sponsor-n {
+  font-size: 2rem;
+  font-weight: lighter;
+  color: #ddd;
+  margin: 0 0 0 20px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  font-family: 'Roboto', 'Trebuchet MS', sans-serif;
+  font-style: italic;
+}
+.sponsor-box {
+  width: 400px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 15px;
+}
+.sponsor-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Timeline (new, not a legacy port). Top-right card: past rows dim and strike
+   through, next-up row gets the accent highlight. */
+
+.iss-timeline {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 50px;
+  display: flex;
+  flex-flow: column nowrap;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 14px 18px;
+  border-right: 3px solid #ffb000;
+  min-width: 18rem;
+  font-family: 'Trebuchet MS', sans-serif;
+  color: #fff;
+}
+
+.iss-timeline-header {
+  text-align: left;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+.iss-timeline-program {
+  font-size: 0.8em;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #ccc;
+}
+.iss-timeline-title {
+  font-size: 1.4em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+.iss-timeline-rows {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 4px;
+}
+.iss-timeline-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 1.05em;
+  transition: background 240ms, color 240ms, opacity 240ms;
+}
+.iss-timeline-row-t {
+  font-family: 'Consolas', 'Cascadia Mono', monospace;
+  font-weight: 700;
+  font-size: 0.95em;
+  width: 5.5rem;
+  flex-shrink: 0;
+  color: #ffb000;
+}
+.iss-timeline-row-desc {
+  font-size: 0.95em;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.iss-timeline-row-past {
+  opacity: 0.4;
+}
+.iss-timeline-row-past .iss-timeline-row-t,
+.iss-timeline-row-past .iss-timeline-row-desc {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.iss-timeline-row-next {
+  background: rgba(255, 176, 0, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 176, 0, 0.4);
+}
+.iss-timeline-row-next .iss-timeline-row-t {
+  color: #ffd35a;
+}
+
+.iss-timeline-footer {
+  margin-top: 10px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.72em;
+  font-style: italic;
+  text-align: center;
+  color: #aaa;
+}

@@ -1,0 +1,10 @@
+id = "its-command-palette"
+version = "0.1.0"
+description = "Ctrl+K palette for switching between top-level views. Lives in the global overlay slot so it's available from every route."
+
+[ui]
+entry = "ui/index.tsx"
+
+[[ui.mounts]]
+target = "overlay"
+component = "CommandPalette"

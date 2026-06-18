@@ -1,0 +1,44 @@
+/* Inline data-flow pill, one per page in the navbar. */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge-live {
+  background: color-mix(in srgb, var(--status-live) 14%, transparent);
+  color: var(--status-live);
+  border: 1px solid color-mix(in srgb, var(--status-live) 40%, transparent);
+}
+
+.status-badge-stale {
+  background: color-mix(in srgb, var(--status-stale) 14%, transparent);
+  color: var(--status-stale);
+  border: 1px solid color-mix(in srgb, var(--status-stale) 40%, transparent);
+}
+
+.status-badge-no-data {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* margin-left gives the gap from "STALE" since JSX collapses whitespace between
+   adjacent elements; goes away with the element when hidden. */
+.status-badge-detail {
+  margin-left: 0.3em;
+}
+
+/* Phone: drop the age detail (color already carries the warning). */
+@media (max-width: 550px) {
+  .status-badge-detail {
+    display: none;
+  }
+}

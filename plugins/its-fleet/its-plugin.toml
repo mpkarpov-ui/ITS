@@ -1,0 +1,13 @@
+id = "its-fleet"
+version = "0.1.0"
+description = "Operator console for managing remote stations (shells). Lists stations, hardware, intakes; provides connect/disconnect controls."
+
+[ui]
+entry = "ui/index.tsx"
+icon = "server"
+
+[[ui.mounts]]
+target = "tab"
+component = "FleetView"
+route = "/fleet"
+title = "Fleet"

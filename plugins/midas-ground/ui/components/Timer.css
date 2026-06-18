@@ -1,0 +1,40 @@
+/* Flight-count timer card (GSS FlightCountTimer anatomy). Paused state pulses
+   bright/dim so the hold reads without strobing. */
+.cmd-timer-card {
+  margin-bottom: 0.8rem;
+}
+
+.cmd-timer-display {
+  /* Legacy GSS look: plain mono, normal weight, no tracking. */
+  font-family: var(--mono);
+  font-size: 2rem;
+  text-align: center;
+  color: var(--text);
+  width: 100%;
+}
+
+.cmd-timer-t-text {
+  /* Prefix stays dim while the time pulses on pause (legacy never recolored it). */
+  color: var(--text-dim);
+}
+
+.cmd-timer-paused {
+  animation: cmd-timer-pulse 3s ease-in-out infinite;
+}
+
+@keyframes cmd-timer-pulse {
+  0%, 100% {
+    color: var(--status-stale);
+  }
+  50% {
+    color: color-mix(in srgb, var(--status-stale) 50%, var(--bg));
+  }
+}
+
+.cmd-timer-idle {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}

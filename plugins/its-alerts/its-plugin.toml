@@ -1,0 +1,33 @@
+id = "its-alerts"
+version = "0.1.0"
+description = "Toast notifications for plugin-published alerts. Subscribes to its.*.*.alert (every plugin's alert stream) and renders into the host's overlay slot. Other plugins emit alerts by declaring [[publishes]] stream = \"alert\" against the shared Alert schema this plugin owns."
+
+[ui]
+entry = "ui/index.tsx"
+icon = "bell"
+
+[[ui.mounts]]
+target = "overlay"
+component = "AlertToasts"
+
+# Always-mounted create-alert composer. Hidden until an `its:create-alert`
+# event fires (from the Home Alerts bell or the "Fire alert" palette command).
+[[ui.mounts]]
+target = "overlay"
+component = "AlertComposer"
+
+# Full-page alerts dashboard: per-source counts, mute controls (sources /
+# levels / sticky keys), active sticky alerts with clear-and-mute, recent
+# history backed by usePersisted. The composer is reused via the existing
+# `its:create-alert` event.
+[[ui.mounts]]
+target = "tab"
+component = "AlertsView"
+route = "/alerts"
+title = "Alerts"
+
+# Cluster-wide suppression policy. Persisted in the its-globals JetStream KV
+# bucket; mutated only from AlertsView, read by AlertToasts (overlay), the
+# Home Alerts panel, and AlertsView itself.
+[[globals]]
+name = "suppression"

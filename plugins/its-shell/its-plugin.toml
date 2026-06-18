@@ -1,0 +1,54 @@
+id = "its-shell"
+version = "0.1.0"
+description = "Hardware-attached station daemon. Spawns plugin intakes on behalf of the central server; exposes lifecycle + exec verbs over NATS."
+
+[runtime]
+kind = "subprocess"
+entry = "src/its_shell/main.py"
+
+[config]
+instance_key = ["name"]
+# No dev_defaults: a shell must be launched explicitly via `its shell <host>`
+# or `its connect shell <host>` so its dev doesn't accidentally spawn a local
+# station with whatever name the host happens to have.
+
+[[publishes]]
+stream = "heartbeat"
+
+[[publishes]]
+stream = "hardware"
+
+[[publishes]]
+stream = "exec_output"
+path = "exec.{exec_id}.output"
+
+# Heartbeat + hardware are slow-moving and operators expect them present the
+# moment they open the fleet/console views. Opting into the shared cache means
+# useCached / useCachedMap consumers warm-start instead of waiting for the
+# next publish (1s for heartbeat, 10s for hardware).
+[[cache]]
+subject = "heartbeat"
+
+[[cache]]
+subject = "hardware"
+
+[[commands]]
+verb = "connect"
+[[commands]]
+verb = "disconnect"
+[[commands]]
+verb = "restart"
+[[commands]]
+verb = "list"
+[[commands]]
+verb = "hardware"
+[[commands]]
+verb = "shutdown"
+[[commands]]
+verb = "its_invoke"
+[[commands]]
+verb = "exec_start"
+[[commands]]
+verb = "exec_stop"
+[[commands]]
+verb = "exec_stdin"

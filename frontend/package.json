@@ -1,0 +1,20 @@
+{
+  "name": "@its/frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "preact": "^10",
+    "@its/frontend-host": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^5",
+    "@preact/preset-vite": "^2",
+    "vite-plugin-cesium": "^1.2",
+    "typescript": "^5"
+  }
+}

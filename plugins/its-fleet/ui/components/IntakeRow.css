@@ -1,0 +1,62 @@
+.intake-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.4rem 1rem;
+  align-items: center;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-2);
+  margin-bottom: 0.3rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+}
+
+.intake-id {
+  font-family: var(--mono);
+  color: var(--text);
+  font-weight: 600;
+  grid-column: 1;
+}
+
+.intake-meta {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.8rem;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  font-family: var(--mono);
+}
+
+.intake-plugin { color: var(--text); }
+
+.intake-actions {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.intake-btn {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 0.25rem 0.6rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-family: var(--mono);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.intake-btn:hover { background: var(--border); }
+
+.intake-btn-stop {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--status-error) 50%, var(--border));
+  color: var(--status-error);
+}
+
+.intake-btn-stop:hover {
+  background: color-mix(in srgb, var(--status-error) 14%, transparent);
+}

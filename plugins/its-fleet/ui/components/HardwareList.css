@@ -1,0 +1,38 @@
+.hw-list { font-family: var(--sans); font-size: 0.85rem; }
+
+.hw-list-empty {
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 0.5rem;
+}
+
+.hw-section { margin-bottom: 0.6rem; }
+
+.hw-section-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.3rem;
+}
+
+.hw-port {
+  display: flex;
+  gap: 0.8rem;
+  align-items: baseline;
+  padding: 0.3rem 0.6rem;
+  background: var(--surface-2);
+  border-radius: 3px;
+  margin-bottom: 0.2rem;
+  font-family: var(--mono);
+}
+
+.hw-port-name { color: var(--text); font-weight: 600; min-width: 5rem; }
+.hw-port-desc { color: var(--text-dim); flex: 1; }
+.hw-port-mfr { color: var(--text-muted); font-size: 0.75rem; }
+
+.hw-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 0.3rem 0;
+}

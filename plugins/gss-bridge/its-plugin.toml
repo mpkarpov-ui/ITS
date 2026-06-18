@@ -1,0 +1,52 @@
+id = "gss-bridge"
+version = "0.1.0"
+description = "Translates GSS MQTT telemetry into ITS Tlm packets. Lets the legacy ground station coexist with ITS during the migration: GSS keeps publishing on its existing MQTT topics, the bridge rebroadcasts the data as native ITS streams that FlightView and other consumers read transparently."
+
+[runtime]
+kind = "subprocess"
+entry = "src/gss_bridge/main.py"
+# Intake-shaped: the bridge is launched on demand from the BridgesView UI
+# below, not auto-spawned. One instance per MIDAS channel. The local
+# its-shell running on the server hosts the intake processes.
+autostart = false
+
+# One stream: a Tlm packet whose schema is shared from mock-rocket via the
+# cross-plugin import pattern. schemas/tlm.py re-exports it so the codegen
+# wires up a typed `subjects.gssBridge.tlm(<channel>)` accessor for the
+# frontend.
+[[publishes]]
+stream = "tlm"
+
+# LOS watchdog: the bridge fires one WARN alert when its MQTT topic
+# stops for >3s, cleared automatically on the next packet. One alert key
+# per channel (instance_key) so the toast updates in place across LOS /
+# recovery cycles instead of stacking.
+[[publishes]]
+stream = "alert"
+
+# Each instance bridges one MQTT topic <-> one ITS channel. To bridge a
+# second telemetry stream (e.g. a sustainer), launch a second instance
+# with a different `channel`. The shell/supervisor enforces uniqueness
+# of the instance_key segment, so two bridges can't accidentally publish
+# to the same Tlm subject.
+#
+# No dev_defaults: gss-bridge is no longer autostart, so there's nothing
+# for `its dev` to pre-spawn. The BridgesView form supplies these fields
+# per-launch and the local shell receives them via `commands.itsShell.connect`.
+[config]
+instance_key = ["channel"]
+
+# Frontend: a /bridges tab for operator-driven intake management. Lists
+# the currently-running gss-bridge instances and provides a form to
+# launch new ones. The page issues `commands.itsShell.connect('server',
+# {plugin: 'gss-bridge', config: {...}})` to spawn an intake on the
+# local server shell.
+[ui]
+entry = "ui/index.tsx"
+icon = "bridge"
+
+[[ui.mounts]]
+target = "tab"
+component = "BridgesView"
+route = "/bridges"
+title = "Bridges"

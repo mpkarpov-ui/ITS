@@ -1,0 +1,92 @@
+/* Scrollable column: too many buttons + timer + pyro grid to fit small screens. */
+.cmd-view {
+  padding: 0.8rem;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  overflow-y: auto;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+/* Locked state: centered lock callout. Soft tokens so it reads "gated", not
+   "access denied". */
+.cmd-unauth-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 2rem;
+}
+
+.cmd-unauth-icon {
+  color: var(--text-muted);
+}
+
+.cmd-unauth {
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.cmd-unauth-sub {
+  color: var(--text-dim);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  text-align: center;
+  max-width: 24rem;
+}
+
+.cmd-unauth-retry {
+  margin-top: 0.4rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.5rem 1.2rem;
+  border-radius: 3px;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.cmd-unauth-retry:hover {
+  background: var(--border);
+  border-color: var(--accent);
+}
+
+.cmd-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+/* Legacy GSS layout: left/right button groups pushed apart, wrapping on narrow. */
+.cmd-split {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.cmd-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.cmd-hint {
+  margin: 0.3rem 0 0 0;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  font-style: italic;
+}

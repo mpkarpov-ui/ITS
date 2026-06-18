@@ -1,0 +1,101 @@
+.map-view {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.map-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* HUD pinned bottom-left, semi-translucent so it doesn't obscure the marker. */
+.map-hud {
+  position: absolute;
+  bottom: 0.7rem;
+  left: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.75rem;
+  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text);
+  backdrop-filter: blur(6px);
+  z-index: 10;
+  max-width: calc(100% - 1.4rem);
+  flex-wrap: wrap;
+  row-gap: 0.2rem;
+}
+
+.map-hud-label {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.65rem;
+}
+
+.map-hud-value {
+  color: var(--text);
+}
+
+.map-hud-sep {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* Track toggle pill; accent-colored when the camera is following. */
+.map-hud-track {
+  margin-left: 0.45rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 0.22rem 0.6rem;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.map-hud-track:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.map-hud-track:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.map-hud-track-on,
+.map-hud-track-on:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.map-error {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  background: color-mix(in srgb, var(--status-error) 14%, var(--surface));
+  border: 1px solid var(--status-error);
+  color: var(--status-error);
+  padding: 0.7rem 0.9rem;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  z-index: 20;
+}
+
+/* Cesium credits route to a detached div (Viewer creditContainer in MapView.tsx),
+   so nothing renders here. */

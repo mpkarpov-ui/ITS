@@ -1,0 +1,16 @@
+{
+  "name": "@its/midas-ground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "preact": "^10",
+    "wouter": "^3",
+    "chart.js": "^4",
+    "react-chartjs-2": "^5",
+    "chartjs-plugin-zoom": "^2",
+    "standard-atmosphere": "^0.3",
+    "cesium": "^1.123",
+    "@its/sdk-react": "workspace:*"
+  }
+}

@@ -1,0 +1,83 @@
+/* Command buttons. Dark palette is the GSS-faithful original; the light block
+   below mirrors it for sunlit use. red = danger, yellow = caution, blue = info. */
+.cmd-button {
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  background: #1a1a1a;
+  color: #fff;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 6rem;
+  transition: background-color 0.08s ease;
+}
+
+.cmd-button:hover {
+  background: #2a2a2a;
+}
+
+.cmd-button-red {
+  background: #4a0a0a;
+  border-color: #aa3030;
+  color: #ffd0d0;
+}
+.cmd-button-red:hover { background: #6a0c0c; }
+
+.cmd-button-yellow {
+  background: #4a3a08;
+  border-color: #c0a020;
+  color: #ffeaa0;
+}
+.cmd-button-yellow:hover { background: #6a5208; }
+
+.cmd-button-blue {
+  background: #0a2845;
+  border-color: #3a78c0;
+  color: #c0dcff;
+}
+.cmd-button-blue:hover { background: #0c3458; }
+
+.cmd-button-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.cmd-button-disabled:hover {
+  background: inherit;
+}
+
+[data-theme="light"] .cmd-button {
+  background: #e8e8eb;
+  border-color: #c4c4ca;
+  color: #0a0a0c;
+}
+[data-theme="light"] .cmd-button:hover {
+  background: #dadadf;
+}
+
+[data-theme="light"] .cmd-button-red {
+  background: #ffe2e2;
+  border-color: #c41a1a;
+  color: #7a0a0a;
+}
+[data-theme="light"] .cmd-button-red:hover { background: #ffcaca; }
+
+[data-theme="light"] .cmd-button-yellow {
+  background: #fff0c8;
+  border-color: #a16700;
+  color: #5a3a00;
+}
+[data-theme="light"] .cmd-button-yellow:hover { background: #ffe39d; }
+
+[data-theme="light"] .cmd-button-blue {
+  background: #d6e7fa;
+  border-color: #1c5ec7;
+  color: #0e3a82;
+}
+[data-theme="light"] .cmd-button-blue:hover { background: #bedaf6; }

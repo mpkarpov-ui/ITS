@@ -1,0 +1,19 @@
+/* Fills its grid cell (sized by FlightView.css). position: relative is chart.js's
+   perch for its resize observer. */
+.graph-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.4rem;
+  height: 100%;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.graph-container > canvas {
+  flex: 1;
+  min-height: 0;
+}

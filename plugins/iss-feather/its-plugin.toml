@@ -1,0 +1,40 @@
+id = "iss-feather"
+version = "0.1.0"
+description = "Native feather_duo telemetry intake for the ISS rocketry team. Reads MIDAS telemetry over USB serial and publishes native Tlm; relays operator commands back to the rocket via the MIDAS-Shell (MShell) command line on the same port. Replaces the gss-bridge MQTT path with a direct hardware link."
+
+[runtime]
+kind = "subprocess"
+entry = "src/iss_feather/main.py"
+# Intake-shaped: launched on demand (one instance per physical receiver / COM
+# port), not auto-spawned. The local its-shell on the server hosts the process.
+autostart = false
+
+# One Tlm stream, fanned out by MIDAS serial. A feather_duo carries TWO radios
+# tracking two rockets, so a single instance owns one COM port but splits its
+# output by the packet's serial: its.iss-feather.<channel>.<serial>.tlm. The
+# {midas_id} placeholder is filled per-packet from the serial field. Schema is
+# the canonical Tlm, re-exported from midas-ground via schemas/tlm.py.
+[[publishes]]
+stream = "tlm"
+path = "{midas_id}.tlm"
+
+# Per-command result, published after each mshell line runs:
+# its.iss-feather.<channel>.cmd_result. Lets a broadcast command surface every
+# feather's reply (the request/reply bus only carries one reply per broadcast).
+[[publishes]]
+stream = "cmd_result"
+
+# Raw MShell passthrough: operators send a literal command line (e.g. "fire 42
+# A", "safe 7", "frequency 0 set 421.15") and get the feather's reply lines
+# back. Bidirectional per-instance request/reply on
+# its.cmd.iss-feather.<channel>.mshell.
+[[commands]]
+verb = "mshell"
+
+# instance_key = the logical channel/receiver name. Kept separate from `port`
+# so a socket:// dev URL or a raw COM path doesn't leak into the bus subject.
+# dev_defaults point at the bundled emulator so `its dev` brings the intake up
+# with no hardware attached; swap `port` to a COM path for real hardware.
+[config]
+instance_key = ["channel"]
+dev_defaults = { channel = "dev", port = "socket://127.0.0.1:5555", baud = 460800 }

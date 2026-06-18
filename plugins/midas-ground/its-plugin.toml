@@ -1,0 +1,59 @@
+id = "midas-ground"
+version = "0.1.0"
+description = "MIDAS ground-side operator suite: flight telemetry dashboard + commanding console. Bundled together so launch-day operators don't pay per-view chunk loads when switching between them under stress."
+
+# Single always-on relay backend. It is the canonical MIDAS telemetry
+# endpoint: subscribes to whatever sources exist (gss-bridge today, feather
+# later), reads each packet's MIDAS id off the incoming subject, and
+# re-publishes onto its own subtree. The frontend reads only this stream and
+# stays source-blind.
+[runtime]
+kind = "subprocess"
+entry = "src/midas_ground/main.py"
+autostart = true
+
+# Templated fan-out: one process serves every MIDAS. The {midas_id} placeholder
+# is filled per-packet from the relay's emit call, yielding
+# its.midas-ground.<instance>.<midas_id>.tlm. No per-MIDAS process or config.
+[[publishes]]
+stream = "tlm"
+path = "{midas_id}.tlm"
+
+[ui]
+entry = "ui/index.tsx"
+icon = "broadcast"
+# Primary mission plugin - pin it to the top of the nav rail above the
+# platform's its- utilities. Higher priority floats nearer the top.
+priority = 100
+
+# Two top-level tabs from one plugin chunk. Opening either /flight or
+# /commanding loads the whole midas-ground bundle, so the second view is
+# already warm in memory.
+
+[[ui.mounts]]
+target = "tab"
+component = "FlightView"
+route = "/flight"
+title = "Flight"
+
+[[ui.mounts]]
+target = "tab"
+component = "CommandingView"
+route = "/commanding"
+title = "Commanding"
+
+# Map view loads cesium (~3MB minified) which we don't want on the hot
+# path. The export in ui/index.tsx wraps a `lazy(() => import('./MapView'))`
+# so Vite emits a separate chunk - only fetched when an operator opens
+# /map for the first time. Flight + Commanding stay light.
+[[ui.mounts]]
+target = "tab"
+component = "MapView"
+route = "/map"
+title = "Map"
+
+# Shared launch-countdown state. CommandingView writes it from its Timer
+# Control panel; FlightView (and any other view that wants the count) reads
+# it. Persisted in the its-globals JetStream KV bucket.
+[[globals]]
+name = "timer"

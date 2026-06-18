@@ -1,0 +1,21 @@
+.mode-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.mode-badge-constrained {
+  background: color-mix(in srgb, var(--status-stale) 18%, transparent);
+  color: var(--status-stale);
+  border: 1px solid color-mix(in srgb, var(--status-stale) 70%, transparent);
+}
+
+.mode-badge-full {
+  background: color-mix(in srgb, var(--status-error) 18%, transparent);
+  color: var(--status-error);
+  border: 1px solid color-mix(in srgb, var(--status-error) 70%, transparent);
+}

@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["vite/client"]
+  },
+  "include": [
+    "frontend/src",
+    "frontend/vite.config.ts",
+    "packages/frontend-host/src",
+    "packages/sdk-react/src",
+    "packages/contracts/types",
+    "plugins/*/ui"
+  ]
+}

@@ -1,0 +1,27 @@
+[project]
+name = "its-platform"
+version = "0.1.0"
+description = "ITS CLI - the `its` command and its subcommands."
+requires-python = ">=3.11"
+dependencies = [
+    "typer>=0.12",
+    "questionary",
+    "its-bus",
+    "its-core",
+    "its-contracts",
+]
+
+[project.scripts]
+its = "its_cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/its_cli"]
+
+[tool.uv.sources]
+its-bus = { workspace = true }
+its-core = { workspace = true }
+its-contracts = { workspace = true }

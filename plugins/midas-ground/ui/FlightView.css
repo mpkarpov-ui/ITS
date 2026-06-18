@@ -1,0 +1,146 @@
+/* Fit-to-viewport, no desktop scroll. The min-height:0 chain lets flex/grid
+   children shrink past content so the chart canvases resize on window change. */
+.flight-view {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 0.6rem;
+  padding: 0.6rem;
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.flight-view-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 0;
+}
+
+/* Graphs ValueGroup gets all remaining height. */
+.flight-view-left > .value-card-group:first-child {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+
+/* ValueGroup's child wrapper, targeted structurally since ValueDisplay
+   exposes no class hook for it. */
+.flight-view-left > .value-card-group:first-child > div:not(.card-overlay):not(.value-card-gname) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Cameras (second ValueGroup) keeps its natural height. */
+.flight-view-left > .value-card-group:nth-child(2) {
+  flex: 0 0 auto;
+  margin-bottom: 0;
+}
+
+.graph-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.flight-view-right {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.flight-view-right > .value-card-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-bottom: 0;
+}
+
+/* Card stack scrolls inside the column on short screens so the graphs keep
+   filling the viewport instead of scrolling off. */
+.flight-view-right > .value-card-group > div:not(.card-overlay):not(.value-card-gname) {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* Tighter cards so 1080p / 1440p workstations fit everything without scroll. */
+.flight-view-right .value-card {
+  margin-bottom: 0;
+  padding: 0.45rem 0.7rem;
+}
+
+.flight-view-right .value-card-name {
+  font-size: 0.65rem;
+  margin-bottom: 0.2rem;
+}
+
+.flight-view-right .value-card-display {
+  font-size: 1.15rem;
+}
+
+@media (max-width: 1200px) {
+  .flight-view {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  /* Below this, side-by-side graphs are unreadable: stack columns and graphs,
+     let the page scroll, give each graph a fixed height for chart.js. */
+  .midas-page {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+  .midas-page > :not(.midas-nav) {
+    overflow: visible;
+  }
+  .flight-view {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+  .flight-view-left,
+  .flight-view-right,
+  .flight-view-left > .value-card-group:first-child,
+  .flight-view-right > .value-card-group {
+    min-height: 0;
+  }
+  .graph-row {
+    grid-template-columns: 1fr;
+    flex: none;
+  }
+  .graph-container {
+    height: 200px;
+  }
+  /* Whole page scrolls now, so drop the right column's internal scroll. */
+  .flight-view-right > .value-card-group > div:not(.card-overlay):not(.value-card-gname) {
+    overflow: visible;
+    flex: none;
+  }
+}
+
+@media (max-width: 500px) {
+  /* Phone-tight: trim graph height and outer padding. */
+  .flight-view {
+    padding: 0.4rem;
+    gap: 0.4rem;
+  }
+  .graph-container {
+    height: 160px;
+  }
+}

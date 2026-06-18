@@ -1,0 +1,49 @@
+id = "iss-live"
+version = "0.1.0"
+description = "ISS livestream production: OBS bridge, broadcast overlay, operator control deck. Mission-coupled to midas-ground telemetry."
+
+[ui]
+entry = "ui/index.tsx"
+icon = "camera"
+
+# Operator's control deck. Where the broadcast crew lives during a launch:
+# OBS scene switching, audio routing, preset application, name-tag and
+# idle-text editing, format YAML editing.
+[[ui.mounts]]
+target = "tab"
+component = "ControlDeck"
+route = "/stream-control"
+title = "Stream"
+
+# OBS browser-source target. Operators can also pop it open from the
+# navbar to QA the overlay state. Sub-modes (facts, sponsors, idle,
+# goodbye, map) ride on a `?mode=` query param so the manifest stays a
+# single mount and we don't have to teach the host wildcard routing.
+[[ui.mounts]]
+target = "tab"
+component = "Overlay"
+route = "/overlay"
+title = "Overlay"
+
+# All shared across operator tabs and the overlay's OBS browser-source.
+# Backed by the its-globals JetStream KV bucket. Editable from the
+# control deck; the overlay reads them via useGlobal.
+
+[[globals]]
+name = "overlay_visibility"
+
+[[globals]]
+name = "name_tag"
+
+[[globals]]
+name = "idle_text"
+
+# A single global holding all named format YAMLs as raw text. One entry
+# per format ("cassie", "aether", etc.). Operators edit via the control
+# deck's Formats tab; full dict gets rewritten on save. Small enough
+# that this is fine - a handful of formats at a few KB each.
+[[globals]]
+name = "formats"
+
+[[globals]]
+name = "active_format"

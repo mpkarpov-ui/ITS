@@ -1,0 +1,36 @@
+/* Mobile-only floating navigator button; hidden on desktop where Ctrl/Cmd+K
+   covers it. */
+
+.its-mobile-nav {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .its-mobile-nav {
+    /* fixed pins to the viewport, clearing any plugin's scroll container. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 1.1rem;
+    right: 1.1rem;
+    z-index: 1000;
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    transition: background-color 0.12s ease, border-color 0.12s ease,
+                color 0.12s ease, transform 0.08s ease;
+  }
+  .its-mobile-nav:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .its-mobile-nav:active {
+    transform: scale(0.95);
+  }
+}

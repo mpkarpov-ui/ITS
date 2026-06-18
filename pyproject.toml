@@ -1,0 +1,13 @@
+[tool.uv.workspace]
+members = ["packages/*", "plugins/*"]
+# JS-only packages have no pyproject.toml; uv must be told to skip them.
+# Add JS-only plugins (and throwaway plugins without pyproject.toml) here.
+exclude = [
+    "packages/sdk-react",
+    "packages/frontend-host",
+    "plugins/its-fleet",
+    "plugins/its-console",
+    "plugins/its-command-palette",
+    "plugins/its-alerts",
+    "plugins/iss-live",
+]

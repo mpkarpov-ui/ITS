@@ -1,0 +1,10 @@
+{
+  "name": "@its/gss-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "preact": "^10",
+    "@its/sdk-react": "workspace:*"
+  }
+}

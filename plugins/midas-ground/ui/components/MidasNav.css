@@ -1,0 +1,168 @@
+/* Page wrapper pinned to viewport height; nav natural, view gets the rest.
+   overflow:hidden here lets each view own its scroll (FlightView fit, Commanding scrolls). */
+.midas-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.midas-page > :not(.midas-nav) {
+  flex: 1;
+  min-height: 0;
+}
+
+.midas-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 4px 0.6rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.midas-nav-title {
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  padding: 0.35rem 0.7rem 0.35rem 0.25rem;
+  margin-right: 0.4rem;
+  border-right: 1px solid var(--border);
+}
+
+.midas-nav-tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.midas-nav-item {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  padding: 0.35rem 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.midas-nav-item:hover {
+  color: var(--text);
+}
+
+.midas-nav-active,
+.midas-nav-active:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.midas-nav-spacer {
+  flex: 1;
+}
+
+.midas-nav .status-badge {
+  margin-right: 0.6rem;
+}
+
+.midas-nav-rocket {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.midas-nav-rocket-label {
+  color: var(--text-muted);
+}
+
+.midas-nav-select {
+  min-width: 8.5rem;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.3rem 2rem 0.3rem 0.75rem;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23a0a0a8'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 8px 5px;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.midas-nav-select:hover {
+  border-color: var(--accent);
+}
+
+.midas-nav-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.midas-nav-tabs-mobile {
+  display: none;
+  min-width: 7rem;
+}
+
+/* Phone (< 700px): tabs collapse to a dropdown. */
+@media (max-width: 700px) {
+  .midas-nav {
+    gap: 0.4rem;
+    padding: 4px 0.4rem;
+  }
+  .midas-nav-title {
+    padding: 0.35rem 0.4rem 0.35rem 0.1rem;
+    margin-right: 0.2rem;
+    letter-spacing: 0.1em;
+  }
+  .midas-nav-tabs {
+    display: none;
+  }
+  .midas-nav-tabs-mobile {
+    display: inline-block;
+  }
+  .midas-nav .status-badge {
+    margin-right: 0.3rem;
+  }
+  /* Drop the "target" word; the select is recognizable on its own. */
+  .midas-nav-rocket-label {
+    display: none;
+  }
+}
+
+/* Very small (< 550px): drop the brand title; everything fits one row on a
+   ~360px phone. Wrap is a fallback if a future label pushes past it. */
+@media (max-width: 550px) {
+  .midas-nav {
+    flex-wrap: wrap;
+    row-gap: 0.3rem;
+  }
+  .midas-nav-title {
+    display: none;
+  }
+  .midas-nav-tabs-mobile {
+    min-width: 6rem;
+  }
+  /* Keep the dropdown wide enough to read the full "MIDAS 007" label. */
+  .midas-nav-rocket .midas-nav-select {
+    min-width: 8.5rem;
+    padding: 0.3rem 1.5rem 0.3rem 0.6rem;
+    background-position: right 0.55rem center;
+  }
+  .midas-nav .status-badge {
+    margin-right: 0;
+  }
+}

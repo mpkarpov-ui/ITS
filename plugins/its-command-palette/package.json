@@ -1,0 +1,11 @@
+{
+  "name": "@its/its-command-palette",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "preact": "^10",
+    "wouter": "^3",
+    "@its/sdk-react": "workspace:*"
+  }
+}

@@ -1,0 +1,130 @@
+/* Fleet-internal value cards, token-driven for theme adaptation. */
+
+.value-card {
+  position: relative;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.6rem 0.8rem;
+  color: var(--text);
+  font-family: var(--sans);
+  margin-bottom: 0.4rem;
+}
+
+.value-card-name {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.value-card-display {
+  font-size: 1.4rem;
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.value-card-unit {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-left: 0.3rem;
+  font-weight: 400;
+}
+
+.value-card-display-multi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 0.4rem;
+  font-family: var(--mono);
+}
+
+.value-card-display-multi-item {
+  min-width: 0;
+}
+
+.shrink-text {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-dim);
+}
+
+.value-card-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.8rem;
+  position: relative;
+  margin-bottom: 0.6rem;
+}
+
+.value-card-group-smalllabel .value-card-name {
+  font-size: 0.6rem;
+}
+
+.value-card-gname {
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 0.3rem;
+}
+
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  z-index: 2;
+  border-radius: 4px;
+}
+
+.card-hide {
+  opacity: 0.2;
+  filter: blur(1px);
+}
+
+.status-card {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-2);
+  margin-bottom: 0.4rem;
+}
+
+.status-name {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.status-display {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+.status-ok      { color: var(--status-live);  background: color-mix(in srgb, var(--status-live) 14%, transparent); }
+.status-warning { color: var(--status-stale); background: color-mix(in srgb, var(--status-stale) 14%, transparent); }
+.status-caution { color: var(--status-stale); background: color-mix(in srgb, var(--status-stale) 18%, transparent); }
+.status-error   { color: var(--status-error); background: color-mix(in srgb, var(--status-error) 14%, transparent); }
+.status-inactive { color: var(--text-dim);   background: var(--surface-2); }

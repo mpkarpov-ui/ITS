@@ -1,0 +1,10 @@
+{
+  "name": "@its/its-alerts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "preact": "^10",
+    "@its/sdk-react": "workspace:*"
+  }
+}

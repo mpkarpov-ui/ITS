@@ -1,0 +1,26 @@
+.console-terminal-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* Match xterm's background so no color seam shows around the canvas. */
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.console-terminal-host {
+  flex: 1;
+  padding: 0.4rem;
+  min-height: 0;
+}
+
+.console-terminal-error {
+  background: color-mix(in srgb, var(--status-error) 14%, transparent);
+  color: var(--status-error);
+  padding: 0.4rem 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--status-error) 50%, transparent);
+}

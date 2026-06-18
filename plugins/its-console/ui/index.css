@@ -1,0 +1,56 @@
+.console-view {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.8rem;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+.console-view-detached {
+  padding: 0;
+  min-height: 100vh;
+  gap: 0;
+}
+
+.console-view-detached .console-terminal-wrap {
+  border-radius: 0;
+  border: none;
+}
+
+.console-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.console-empty {
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 1rem;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+
+.console-empty code {
+  background: var(--surface-2);
+  padding: 0.05rem 0.4rem;
+  border-radius: 3px;
+  color: var(--text);
+}
+
+.console-popout {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.3rem 0.8rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-family: var(--mono);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.console-popout:hover { background: var(--border); }

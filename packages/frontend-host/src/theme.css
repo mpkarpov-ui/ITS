@@ -1,0 +1,139 @@
+/* Platform theme baseline. Loaded from main.tsx before any plugin code so every
+   plugin inherits these tokens. Stick to them and theme swaps (light mode,
+   per-mission accents) cost one change here. */
+
+:root {
+  /* Near-black, progressively lighter for stacked panels. */
+  --bg: #0a0a0c;
+  --surface: #141418;
+  --surface-2: #1c1c22;
+
+  /* border-dim for internal row separators, border for panel edges. */
+  --border: #2a2a32;
+  --border-dim: #1f1f25;
+
+  /* Full text, secondary metadata, muted hints. */
+  --text: #e8e8ec;
+  --text-dim: #a0a0a8;
+  --text-muted: #6c6c75;
+
+  --accent: #5aa3ff;
+  --accent-dim: #3a78c0;
+
+  /* Mirror flight-view's StatusBadge so badges and dots stay synced. */
+  --status-live: #00d36c;
+  --status-stale: #d9a400;
+  --status-error: #ff5a5a;
+
+  /* Mono for telemetry numbers/IDs/timestamps, sans for prose and chrome. */
+  --mono: ui-monospace, 'Cascadia Mono', 'Consolas', 'Menlo', monospace;
+  --sans: system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif;
+
+  /* Left gutter the nav rail reserves. NavRail owns this at runtime (3rem shown,
+     0px hidden); the 0px default avoids a first-paint jump, and fixed
+     left-pinned chrome (alert toasts) offsets by it to clear the rail. */
+  --its-rail-width: 0px;
+}
+
+/* Light / high-contrast palette for sunlit sites, toggled via
+   documentElement.dataset.theme = 'light'. Same token names and scale. */
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #f4f4f7;
+  --surface-2: #e6e6ea;
+  --border: #c2c2c8;
+  --border-dim: #dadade;
+  --text: #0a0a0c;
+  --text-dim: #50505a;
+  --text-muted: #82828a;
+  --accent: #1c5ec7;
+  --accent-dim: #4a8fd6;
+  --status-live: #0a8042;
+  --status-stale: #8a5500;
+  --status-error: #c41a1a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Offsets routed content by the rail width (the rail is position:fixed and
+   paints over this gutter). */
+.its-content {
+  padding-left: var(--its-rail-width);
+  transition: padding-left 120ms ease;
+}
+
+/* Dark-tuned scrollbars (Chromium/Safari); Firefox via scrollbar-color below. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-2);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border);
+}
+html {
+  scrollbar-color: var(--surface-2) var(--bg);
+}
+
+/* Light mode: darken the thumb so it reads as a control against the page. */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Plugin lazy-load indicator (TabContent, while a chunk is in flight). Plain
+   CSS because Preact can't put @keyframes in style props. The fade-in is
+   delayed so loads resolving under ~180ms never flash. */
+@keyframes its-loading-scan {
+  0%   { transform: translateX(-110%); }
+  100% { transform: translateX(410%); }
+}
+@keyframes its-loading-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.its-loading {
+  opacity: 0;
+  animation: its-loading-fade-in 220ms ease-out 180ms forwards;
+}
+.its-loading-bar {
+  width: 25%;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  animation: its-loading-scan 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform;
+}

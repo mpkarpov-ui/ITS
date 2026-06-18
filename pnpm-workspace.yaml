@@ -1,0 +1,11 @@
+packages:
+  - "packages/*"
+  - "plugins/*"
+  - "frontend"
+allowBuilds:
+  # esbuild downloads a platform-specific native binary in its postinstall;
+  # vite (transitively) requires this binary to build, so we allow the script.
+  esbuild: true
+  # protobufjs (transitive of cesium) generates pre-compiled descriptors
+  # in its postinstall to skip runtime compile - cosmetic perf, harmless.
+  protobufjs: true
