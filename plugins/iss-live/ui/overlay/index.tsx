@@ -63,8 +63,12 @@ export function Overlay() {
   const hasLaunched = (booster.value?.FSM_State ?? -1) > 2;
 
   useEffect(() => {
+    // Both html and body carry the theme's opaque background; the page canvas
+    // takes html's, so clear it there too or OBS never sees transparency.
+    document.documentElement.classList.add('iss-live-overlay-host');
     document.body.classList.add('iss-live-overlay-host');
     return () => {
+      document.documentElement.classList.remove('iss-live-overlay-host');
       document.body.classList.remove('iss-live-overlay-host');
     };
   }, []);

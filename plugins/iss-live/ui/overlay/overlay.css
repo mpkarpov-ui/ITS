@@ -1,5 +1,7 @@
-/* Added to <body> while Overlay is mounted: overrides the host's dark theme
-   so OBS composites the overlay onto the live video feed. */
+/* Added to <html> and <body> while Overlay is mounted: overrides the host's
+   dark theme so OBS composites the overlay onto the live video feed. The page
+   canvas paints html's background, so both must be cleared, not body alone. */
+html.iss-live-overlay-host,
 body.iss-live-overlay-host {
   background: transparent !important;
 }

@@ -28,6 +28,7 @@ from pydantic import BaseModel
 from its_contracts.iss_feather import Alert, AlertLevel, CmdResult, MshellCommand
 from its_contracts.midas_ground import Tlm
 from its_core.log import get_logger
+from its_core.record import get_recorder
 from its_sdk import command, every, publish, source
 
 log = get_logger("iss-feather")
@@ -65,6 +66,8 @@ class IssFeather:
     def __init__(self) -> None:
         self._loop: asyncio.AbstractEventLoop | None = None
         self._serial: serial.Serial | None = None
+        # Local JSONL log of raw inbound telemetry, keyed per channel instance.
+        self._recorder = get_recorder("iss-feather")
         # Non-`data` reply lines from the reader thread, drained by on_mshell.
         self._status: asyncio.Queue[str] | None = None
         # One mshell line in flight at a time so replies map to their command.
@@ -186,6 +189,8 @@ class IssFeather:
     def _handle_data(self, value: Any) -> None:
         if not isinstance(value, dict):
             return
+        # Persist the raw packet (full fidelity) before Tlm filtering drops keys.
+        self._recorder.write(value)
         serial_no = value.get("serial")
         if serial_no is None:
             # No serial means no MIDAS id to route to. Log the shape once.

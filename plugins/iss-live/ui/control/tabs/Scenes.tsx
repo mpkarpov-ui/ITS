@@ -4,6 +4,7 @@
 import type { JSX } from 'preact';
 import { useObs } from '../../services/useObs';
 import { obsService } from '../../services/obs';
+import { sceneCycler } from '../../services/cycler';
 import { Empty, Panel } from '../ui';
 
 export function ScenesTab() {
@@ -29,7 +30,10 @@ export function ScenesTab() {
             <button
               key={sceneName}
               type="button"
-              onClick={() => obsService.setScene(sceneName).catch((e) => console.warn('[scenes]', e))}
+              onClick={() => {
+                sceneCycler.stop();  // a manual pick takes over from any rotation
+                obsService.setScene(sceneName).catch((e) => console.warn('[scenes]', e));
+              }}
               style={{
                 ...sceneCardStyle,
                 ...(isCurrent ? sceneCardActiveStyle : {}),

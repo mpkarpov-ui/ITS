@@ -5,6 +5,7 @@
 import { globals } from '@its/sdk-react';
 import type { OverlayVisibility } from '@its/contracts/iss-live';
 import { obsService } from '../services/obs';
+import { sceneCycler } from '../services/cycler';
 import type { AudioPreset, FormatFile, Preset } from './types';
 
 const DEFAULT_VIS: OverlayVisibility = {
@@ -46,12 +47,18 @@ export async function applyPreset(
     });
   }
 
-  // Single scene only; cycling presets are scheduled by the Presets tab,
-  // which owns the interval timer and cleanup.
-  const sceneName = preset.scene ?? (preset.scenes && preset.scenes[0]);
-  if (sceneName) {
+  // Switch to the preset's first scene. Any preset apply ends a running
+  // rotation; a cycling preset (multiple scenes + interval) then starts a fresh
+  // one off the first scene. The cycler is a singleton, so rotation persists
+  // regardless of which control tab is shown.
+  const scenes = preset.scenes ?? (preset.scene ? [preset.scene] : []);
+  const cycling = scenes.length > 1 && !!preset.cycle_interval;
+  sceneCycler.stop();
+  const firstScene = scenes[0];
+  if (firstScene) {
     try {
-      await obsService.setScene(sceneName);
+      await obsService.setScene(firstScene);
+      if (cycling) sceneCycler.start(preset.id, scenes, preset.cycle_interval!);
     } catch (e: any) {
       errors.push(e?.message ?? String(e));
     }

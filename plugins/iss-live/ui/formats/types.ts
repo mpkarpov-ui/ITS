@@ -34,7 +34,7 @@ export interface Preset {
   description?: string;
   scene?: string;                // single scene (OBS scene name)
   scenes?: string[];             // multi-scene cycling list
-  cycle_interval?: number;       // seconds; parsed but not yet acted on
+  cycle_interval?: number;       // seconds between scene switches when scenes[] cycles
   audio_preset?: string;         // key into FormatFile.audio_presets
   overlay_state?: PresetOverlayState;
   target_desc?: PresetTargetDesc;

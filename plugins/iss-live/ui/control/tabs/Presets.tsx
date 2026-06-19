@@ -1,12 +1,13 @@
 // Presets tab. Cards from the active format's preset list show scene refs,
-// overlay-state badges, and scene-validation warnings; click to apply.
-// Cycling (cycle_interval + scenes[]) is not wired up: the card shows a
-// "CYCLE Ns" badge but only the first scene is applied.
+// overlay-state badges, and scene-validation warnings; click to apply. A
+// cycling preset (scenes[] + cycle_interval) rotates scenes via the scene-cycler
+// singleton; its card badge shows the live position while rotating.
 
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { globals, useGlobal } from '@its/sdk-react';
 import { useObs } from '../../services/useObs';
+import { useCycler } from '../../services/useCycler';
 import { useActiveFormat } from '../../formats/useFormat';
 import { applyPreset, validatePreset } from '../../formats/apply';
 import type { Preset } from '../../formats/types';
@@ -15,6 +16,7 @@ import { Empty, Panel } from '../ui';
 export function PresetsTab() {
   const { format, name, error, ready } = useActiveFormat();
   const obs = useObs();
+  const cycler = useCycler();
   const [vis] = useGlobal(globals.issLive.overlayVisibility);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [applyErrors, setApplyErrors] = useState<string[]>([]);
@@ -68,6 +70,8 @@ export function PresetsTab() {
                 warnings={validatePreset(p, format, obs.sceneList)}
                 obsConnected={obs.connected}
                 currentScene={obs.currentScene}
+                cyclePos={cycler.presetId === p.id ? cycler.index : null}
+                nextSwitchAt={cycler.presetId === p.id ? cycler.nextSwitchAt : null}
                 onClick={() => handleClick(p)}
               />
             ))}
@@ -92,6 +96,8 @@ function PresetCard({
   warnings,
   obsConnected,
   currentScene,
+  cyclePos,
+  nextSwitchAt,
   onClick,
 }: {
   preset: Preset;
@@ -99,6 +105,8 @@ function PresetCard({
   warnings: string[];
   obsConnected: boolean;
   currentScene: string | null;
+  cyclePos: number | null;       // current scene index while this preset cycles, else null
+  nextSwitchAt: number | null;   // epoch ms of the next switch while cycling, else null
   onClick: () => void;
 }) {
   const allScenes = preset.scenes ?? (preset.scene ? [preset.scene] : []);
@@ -123,7 +131,12 @@ function PresetCard({
       <div style={headerStyle}>
         <span style={nameStyle}>{preset.name}</span>
         {hasCycle && (
-          <span style={cycleBadgeStyle}>Cycle {preset.cycle_interval}s</span>
+          <CycleBadge
+            intervalS={preset.cycle_interval!}
+            pos={cyclePos}
+            total={allScenes.length}
+            nextSwitchAt={nextSwitchAt}
+          />
         )}
       </div>
       {preset.description && <div style={descStyle}>{preset.description}</div>}
@@ -168,6 +181,39 @@ function PresetCard({
         </div>
       )}
     </button>
+  );
+}
+
+// Cycle badge: static "Cycle Ns" when idle; while this preset rotates it shows
+// position plus a live countdown to the next switch, self-ticking off the
+// cycler's nextSwitchAt so it stays accurate across switches.
+function CycleBadge({
+  intervalS,
+  pos,
+  total,
+  nextSwitchAt,
+}: {
+  intervalS: number;
+  pos: number | null;
+  total: number;
+  nextSwitchAt: number | null;
+}) {
+  const cycling = pos !== null && nextSwitchAt !== null;
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!cycling) return;
+    const id = setInterval(() => setTick((n) => n + 1), 250);
+    return () => clearInterval(id);
+  }, [cycling, nextSwitchAt]);
+
+  if (!cycling) {
+    return <span style={cycleBadgeStyle}>Cycle {intervalS}s</span>;
+  }
+  const remaining = Math.max(0, Math.ceil((nextSwitchAt! - Date.now()) / 1000));
+  return (
+    <span style={{ ...cycleBadgeStyle, ...cycleBadgeActiveStyle }}>
+      Cycling {pos! + 1}/{total} · {remaining}s
+    </span>
   );
 }
 
@@ -222,6 +268,11 @@ const cycleBadgeStyle: JSX.CSSProperties = {
   border: '1px solid var(--accent-dim)',
   borderRadius: '3px',
   padding: '0.1rem 0.4rem',
+};
+const cycleBadgeActiveStyle: JSX.CSSProperties = {
+  color: 'var(--status-live)',
+  borderColor: 'var(--status-live)',
+  background: 'color-mix(in srgb, var(--status-live) 14%, transparent)',
 };
 const descStyle: JSX.CSSProperties = {
   color: 'var(--text-dim)',
