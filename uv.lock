@@ -13,7 +13,6 @@ members = [
     "its-bus",
     "its-contracts",
     "its-core",
-    "its-mock-rocket",
     "its-platform",
     "its-sdk-python",
     "its-shell",
@@ -195,17 +194,6 @@ requires-dist = [
     { name = "watchfiles" },
     { name = "websockets" },
 ]
-
-[[package]]
-name = "its-mock-rocket"
-version = "0.1.0"
-source = { editable = "plugins/mock-rocket" }
-dependencies = [
-    { name = "its-sdk-python" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "its-sdk-python", editable = "packages/sdk-python" }]
 
 [[package]]
 name = "its-platform"
