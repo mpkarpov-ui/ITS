@@ -168,7 +168,7 @@ def start(
         # `pnpm exec` runs vite directly; the script-name indirection forwarded
         # "--" as a literal arg.
         vite_proc = subprocess.Popen(
-            [pnpm, "--filter", "@its/frontend", "exec", "vite", "--port", str(VITE_PORT), "--strictPort"],
+            [pnpm, "--filter", "@its/frontend", "exec", "vite", "--host", "--port", str(VITE_PORT), "--strictPort"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,

@@ -15,6 +15,9 @@ class AlertLevel(StrEnum):
     WARN = "warn"
     ERROR = "error"
     CRITICAL = "critical"
+    # PROGRESS is in-flight; SUCCESS is terminal and auto-dismisses even when keyed.
+    PROGRESS = "progress"
+    SUCCESS = "success"
 
 
 class Alert(BaseModel):
@@ -31,3 +34,5 @@ class Alert(BaseModel):
     # Retraction marker; set with `key` to drop the matching sticky. Other fields
     # may be omitted on a clear.
     cleared: bool = False
+    # 0.0-1.0 determinate fraction for a PROGRESS bar; None renders indeterminate.
+    progress: float | None = None

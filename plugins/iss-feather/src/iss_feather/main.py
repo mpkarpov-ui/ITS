@@ -94,8 +94,11 @@ class IssFeather:
         body: str = "",
         key: str | None = None,
         cleared: bool = False,
+        progress: float | None = None,
     ) -> Alert:
-        return Alert(level=level, title=title, body=body, key=key, cleared=cleared)
+        return Alert(
+            level=level, title=title, body=body, key=key, cleared=cleared, progress=progress
+        )
 
     def _alert_key(self, midas_id: str) -> str:
         # Sticky key per (channel, rocket) so recovery clears the same toast.
@@ -222,13 +225,42 @@ class IssFeather:
 
     @command("mshell")
     async def on_mshell(self, req: MshellCommand) -> MshellCommand.Response:
-        ok, replies = await self._run_mshell(req.line)
+        # Sticky progress alert, resolved to success/error once the ack lands.
+        key = self._cmd_alert_key(req)
+        title = f"{self.config.channel}: {req.line}"
+        await self.emit_alert(
+            level=AlertLevel.PROGRESS, key=key, title=title, body="sending...", progress=0.33
+        )
+        ok, replies = await self._run_mshell(req.line, alert_key=key, alert_title=title)
         # Publish on cmd_result so a broadcast caller sees this feather's outcome;
         # the Response below only reaches a direct request/reply caller.
         await self.emit_cmd_result(cmd_id=req.cmd_id, line=req.line, ok=ok, replies=replies)
+        if ok:
+            await self.emit_alert(
+                level=AlertLevel.SUCCESS, key=key, title=title, body="acknowledged"
+            )
+        else:
+            await self.emit_alert(
+                level=AlertLevel.ERROR, key=key, title=title, body=self._failure_reason(replies)
+            )
         return MshellCommand.Response(ok=ok, replies=replies)
 
-    async def _run_mshell(self, line: str) -> tuple[bool, list[str]]:
+    def _cmd_alert_key(self, req: MshellCommand) -> str:
+        # Per (channel, command) so concurrent feathers and commands don't collide.
+        return f"iss_feather_cmd_{self.config.channel}_{req.cmd_id or req.line}"
+
+    def _failure_reason(self, replies: list[str]) -> str:
+        if not replies:
+            return "no response (timeout)"
+        for r in replies:
+            t = self._reply_type(r)
+            if t in _ERROR_TYPES:
+                return t.replace("_", " ")
+        return replies[0]
+
+    async def _run_mshell(
+        self, line: str, alert_key: str | None = None, alert_title: str | None = None
+    ) -> tuple[bool, list[str]]:
         """Write one MShell line and collect replies. Error paths return
         ok=False with a one-line reason."""
         ser = self._serial
@@ -248,16 +280,23 @@ class IssFeather:
                 log.warn(f"mshell write failed ({exc!r})")
                 return False, [f"write failed: {exc}"]
             log.info(f"mshell -> {line!r}")
-            replies = await self._collect_replies(q)
+            replies = await self._collect_replies(q, alert_key, alert_title)
         ok = bool(replies) and not any(self._is_error(r) for r in replies)
         return ok, replies
 
-    async def _collect_replies(self, q: asyncio.Queue[str] | None) -> list[str]:
+    async def _collect_replies(
+        self,
+        q: asyncio.Queue[str] | None,
+        alert_key: str | None = None,
+        alert_title: str | None = None,
+    ) -> list[str]:
         """Wait up to the overall timeout for the first line, then only short
-        quiet gaps between subsequent ones."""
+        quiet gaps between subsequent ones. Bumps the progress alert once the
+        feather reports the command left the ground radio (command_sent)."""
         if q is None:
             return []
         replies: list[str] = []
+        sent_seen = False
         loop = asyncio.get_running_loop()
         deadline = loop.time() + _REPLY_TIMEOUT_S
         while True:
@@ -270,15 +309,28 @@ class IssFeather:
             except asyncio.TimeoutError:
                 break
             replies.append(line)
+            if alert_key and not sent_seen and self._reply_type(line) == "command_sent":
+                sent_seen = True
+                await self.emit_alert(
+                    level=AlertLevel.PROGRESS,
+                    key=alert_key,
+                    title=alert_title or "",
+                    body="sent - awaiting ack",
+                    progress=0.66,
+                )
         return replies
 
     @staticmethod
-    def _is_error(line: str) -> bool:
+    def _reply_type(line: str) -> str | None:
         try:
             msg = json.loads(line)
         except json.JSONDecodeError:
-            return False
-        return isinstance(msg, dict) and msg.get("type") in _ERROR_TYPES
+            return None
+        return msg.get("type") if isinstance(msg, dict) else None
+
+    @staticmethod
+    def _is_error(line: str) -> bool:
+        return IssFeather._reply_type(line) in _ERROR_TYPES
 
 
 if __name__ == "__main__":

@@ -22,8 +22,8 @@ registerCommand({
   },
 });
 
-type AlertLevel = 'info' | 'warn' | 'error' | 'critical';
-const ALL_LEVELS: AlertLevel[] = ['info', 'warn', 'error', 'critical'];
+type AlertLevel = 'info' | 'warn' | 'error' | 'critical' | 'progress' | 'success';
+const ALL_LEVELS: AlertLevel[] = ['info', 'warn', 'error', 'critical', 'progress', 'success'];
 
 // Blanket-mute toggle: adds/removes all four levels in the suppression global,
 // leaving source/key mutes alone so flipping it off restores prior policy.
@@ -51,6 +51,7 @@ interface AlertPayload {
   timeout_ms?: number | null;
   key?: string | null;
   cleared?: boolean;
+  progress?: number | null;
 }
 
 interface Toast {
@@ -63,6 +64,8 @@ interface Toast {
   source: string;
   ts: number;
   timeoutMs: number;
+  // null = indeterminate sweep; number = determinate fraction. Only for progress.
+  progress: number | null;
 }
 
 const MAX_VISIBLE = 5;
@@ -71,7 +74,11 @@ const DEFAULT_TIMEOUTS: Record<AlertLevel, number> = {
   warn: 10_000,
   error: 30_000,
   critical: 60_000,
+  progress: 0,
+  success: 4_000,
 };
+// success is terminal: a keyed progress alert republished as success fades.
+const TERMINAL: AlertLevel = 'success';
 
 // Stroked with currentColor so each icon picks up the per-level CSS color.
 function LevelIcon({ level }: { level: AlertLevel }) {
@@ -126,6 +133,20 @@ function LevelIcon({ level }: { level: AlertLevel }) {
           <circle cx="8" cy="11.55" r="0.85" fill="var(--bg)" />
         </svg>
       );
+    case 'progress':
+      // Ring with a gap; CSS spins it.
+      return (
+        <svg {...props}>
+          <path d="M14 8 A6 6 0 1 1 8 2" />
+        </svg>
+      );
+    case 'success':
+      return (
+        <svg {...props}>
+          <circle cx="8" cy="8" r="6.5" />
+          <path d="M5 8.2 L7.2 10.4 L11 5.8" />
+        </svg>
+      );
   }
 }
 
@@ -145,6 +166,20 @@ function PinIcon() {
       <line x1="12" x2="12" y1="17" y2="22" />
       <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
     </svg>
+  );
+}
+
+// Determinate fill when value is a number, else an indeterminate sweep.
+export function ProgressBar({ value }: { value: number | null }) {
+  const indet = value == null;
+  const pct = indet ? 0 : Math.max(0, Math.min(1, value)) * 100;
+  return (
+    <div class="alert-progress">
+      <div
+        class={`alert-progress-fill${indet ? ' alert-progress-indet' : ''}`}
+        style={indet ? undefined : { width: `${pct}%` }}
+      />
+    </div>
   );
 }
 
@@ -184,6 +219,19 @@ export function AlertToasts() {
     suppressionRef.current = suppression;
   }, [suppression]);
 
+  // Pending auto-dismiss timers keyed by "source|key", so a terminal success on
+  // a sticky alert fades it and a re-progress can cancel the fade.
+  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
+  function clearTimer(tk: string) {
+    const h = timersRef.current.get(tk);
+    if (h) {
+      clearTimeout(h);
+      timersRef.current.delete(tk);
+    }
+  }
+
   useEffect(() => {
     return subscribe('its.*.*.alert', (payload, concreteSubject) => {
       const a = payload as AlertPayload;
@@ -194,6 +242,7 @@ export function AlertToasts() {
       // Sticky retraction: drop the matching toast. Cleared messages pass even
       // for muted sources so a toast raised before muting tears down cleanly.
       if (key && a.cleared) {
+        clearTimer(`${source}|${key}`);
         setToasts((cur) =>
           cur.filter((t) => !(t.source === source && t.key === key)),
         );
@@ -202,11 +251,14 @@ export function AlertToasts() {
 
       if (typeof a.title !== 'string' || !a.title) return;
       const level: AlertLevel = a.level ?? 'info';
+      const progress = typeof a.progress === 'number' ? a.progress : null;
 
       if (isSuppressed(suppressionRef.current, source, level, key)) return;
 
       if (key) {
-        // Sticky: update in place if (source, key) present, else add. No auto-dismiss.
+        const tk = `${source}|${key}`;
+        const terminal = level === TERMINAL;
+        // Sticky: update in place if (source, key) present, else add.
         setToasts((cur) => {
           const idx = cur.findIndex(
             (t) => t.source === source && t.key === key,
@@ -220,6 +272,7 @@ export function AlertToasts() {
             source,
             ts: Date.now(),
             timeoutMs: 0,
+            progress,
           };
           if (idx >= 0) {
             const copy = cur.slice();
@@ -228,6 +281,22 @@ export function AlertToasts() {
           }
           return [next, ...cur].slice(0, MAX_VISIBLE);
         });
+        // Resolved -> fade after the timeout; still in-flight -> cancel any fade.
+        clearTimer(tk);
+        if (terminal) {
+          const ms = a.timeout_ms == null ? DEFAULT_TIMEOUTS[level] : a.timeout_ms;
+          if (ms > 0) {
+            timersRef.current.set(
+              tk,
+              setTimeout(() => {
+                timersRef.current.delete(tk);
+                setToasts((cur) =>
+                  cur.filter((t) => !(t.source === source && t.key === key)),
+                );
+              }, ms),
+            );
+          }
+        }
         return;
       }
 
@@ -243,6 +312,7 @@ export function AlertToasts() {
         source,
         ts: Date.now(),
         timeoutMs,
+        progress,
       };
       setToasts((cur) => [toast, ...cur].slice(0, MAX_VISIBLE));
       if (timeoutMs > 0) {
@@ -254,7 +324,11 @@ export function AlertToasts() {
   }, []);
 
   function dismiss(id: string) {
-    setToasts((cur) => cur.filter((t) => t.id !== id));
+    setToasts((cur) => {
+      const t = cur.find((x) => x.id === id);
+      if (t?.key) clearTimer(`${t.source}|${t.key}`);
+      return cur.filter((x) => x.id !== id);
+    });
   }
 
   if (toasts.length === 0) return null;
@@ -274,6 +348,7 @@ export function AlertToasts() {
           <div class="alert-toast-content">
             <div class="alert-toast-title">{t.title}</div>
             {t.body && <div class="alert-toast-body">{t.body}</div>}
+            {t.level === 'progress' && <ProgressBar value={t.progress} />}
             <div class="alert-toast-meta">
               <span class="alert-toast-source">from {t.source}</span>
               <span class="alert-toast-time">{fmtTime(t.ts)}</span>

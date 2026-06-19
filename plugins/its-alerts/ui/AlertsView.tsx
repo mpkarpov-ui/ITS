@@ -14,11 +14,11 @@ import {
   type PluginInfo,
 } from '@its/sdk-react';
 import type { Suppression } from '@its/contracts/its-alerts';
-import { isSuppressed } from './index';
+import { isSuppressed, ProgressBar } from './index';
 import './AlertsView.css';
 
-type AlertLevel = 'info' | 'warn' | 'error' | 'critical';
-const LEVELS: AlertLevel[] = ['info', 'warn', 'error', 'critical'];
+type AlertLevel = 'info' | 'warn' | 'error' | 'critical' | 'progress' | 'success';
+const LEVELS: AlertLevel[] = ['info', 'warn', 'error', 'critical', 'progress', 'success'];
 const HISTORY_CAP = 200;
 // Source-count window for the Sources panel.
 const RECENT_WINDOW_MS = 60 * 60 * 1000;
@@ -32,6 +32,7 @@ type AlertPayload = {
   body?: string;
   key?: string | null;
   cleared?: boolean;
+  progress?: number | null;
 };
 
 type HistoryEntry = {
@@ -46,6 +47,10 @@ type HistoryEntry = {
   // Set when a retraction lands; the entry stays in the log struck through so
   // the raised/cleared lifecycle stays visible.
   clearedAt: number | null;
+  // Set when a keyed progress alert resolves to success.
+  resolvedAt: number | null;
+  // Determinate fraction for an in-flight progress entry; null = indeterminate.
+  progress: number | null;
 };
 
 function newId(): string {
@@ -118,7 +123,7 @@ export function AlertsView() {
           return next;
         });
         const idx = historyRef.current.findIndex(
-          (e) => e.source === source && e.key === key && e.clearedAt === null,
+          (e) => e.source === source && e.key === key && !e.clearedAt && !e.resolvedAt,
         );
         if (idx >= 0) {
           const next = historyRef.current.slice();
@@ -131,6 +136,8 @@ export function AlertsView() {
 
       if (typeof a.title !== 'string' || !a.title) return;
       const level: AlertLevel = a.level ?? 'info';
+      const progress = typeof a.progress === 'number' ? a.progress : null;
+      const terminal = level === 'success';
       const entry: HistoryEntry = {
         id: newId(),
         level,
@@ -141,16 +148,38 @@ export function AlertsView() {
         ts,
         key,
         clearedAt: null,
+        resolvedAt: terminal ? ts : null,
+        progress,
       };
 
-      // Sticky: replace in the active map (dedupe by source+key).
       if (key) {
         const activeKey = `${source}|${key}`;
+        // Terminal success leaves the in-flight list; anything else stays pinned.
         setActive((cur) => {
           const next = new Map(cur);
-          next.set(activeKey, entry);
+          if (terminal) next.delete(activeKey);
+          else next.set(activeKey, { ...entry, id: cur.get(activeKey)?.id ?? entry.id });
           return next;
         });
+        // Update the open log entry in place so progress ticks don't flood it.
+        const idx = historyRef.current.findIndex(
+          (e) => e.source === source && e.key === key && !e.clearedAt && !e.resolvedAt,
+        );
+        if (idx >= 0) {
+          const next = historyRef.current.slice();
+          next[idx] = {
+            ...next[idx],
+            level,
+            title: a.title,
+            body: a.body ?? '',
+            ts,
+            progress,
+            resolvedAt: terminal ? ts : null,
+          };
+          historyRef.current = next;
+          setHistory(next);
+          return;
+        }
       }
 
       const next = [entry, ...historyRef.current].slice(0, HISTORY_CAP);
@@ -365,6 +394,9 @@ export function AlertsView() {
                       {entry.body && (
                         <div class="alerts-row-body">{entry.body}</div>
                       )}
+                      {entry.level === 'progress' && (
+                        <ProgressBar value={entry.progress} />
+                      )}
                       <div class="alerts-row-meta">
                         {entry.source} · {fmtTime(entry.ts)}
                         {entry.key && (
@@ -475,7 +507,9 @@ export function AlertsView() {
                     key={entry.id}
                     class={`alerts-history-row${
                       entry.clearedAt ? ' alerts-history-cleared' : ''
-                    }${muted ? ' alerts-history-muted' : ''}`}
+                    }${entry.resolvedAt ? ' alerts-history-resolved' : ''}${
+                      muted ? ' alerts-history-muted' : ''
+                    }`}
                   >
                     <span class="alerts-history-time">{fmtTime(entry.ts)}</span>
                     <span class={`alerts-history-icon alerts-level-${entry.level}`}>
@@ -486,6 +520,11 @@ export function AlertsView() {
                     {entry.clearedAt && (
                       <span class="alerts-history-clearmark">
                         cleared {fmtTime(entry.clearedAt)}
+                      </span>
+                    )}
+                    {entry.resolvedAt && !entry.clearedAt && (
+                      <span class="alerts-history-resolvemark">
+                        done {fmtTime(entry.resolvedAt)}
                       </span>
                     )}
                   </div>
@@ -614,6 +653,19 @@ function LevelIcon({ level }: { level: AlertLevel }) {
           <path d="M4.85 1.4 L11.15 1.4 L14.6 4.85 L14.6 11.15 L11.15 14.6 L4.85 14.6 L1.4 11.15 L1.4 4.85 Z" />
           <rect x="7.3" y="4.5" width="1.4" height="5.2" rx="0.45" fill="var(--bg)" />
           <circle cx="8" cy="11.55" r="0.85" fill="var(--bg)" />
+        </svg>
+      );
+    case 'progress':
+      return (
+        <svg {...stroke}>
+          <path d="M14 8 A6 6 0 1 1 8 2" />
+        </svg>
+      );
+    case 'success':
+      return (
+        <svg {...stroke}>
+          <circle cx="8" cy="8" r="6.5" />
+          <path d="M5 8.2 L7.2 10.4 L11 5.8" />
         </svg>
       );
   }

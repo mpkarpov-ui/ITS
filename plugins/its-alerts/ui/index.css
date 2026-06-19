@@ -65,6 +65,22 @@
 .alert-toast-info { border-left-color: var(--accent); }
 .alert-toast-info::before { background: var(--accent); }
 
+/* Progress: in-flight, accent-tinted with a spinning ring. */
+.alert-toast-progress { border-left-color: var(--accent); }
+.alert-toast-progress::before { background: var(--accent); }
+.alert-toast-progress .alert-toast-icon { color: var(--accent); }
+.alert-toast-progress .alert-toast-icon svg {
+  animation: alert-spin 0.9s linear infinite;
+  transform-origin: center;
+}
+@keyframes alert-spin { to { transform: rotate(360deg); } }
+
+/* Success: terminal positive, green. */
+.alert-toast-success { border-left-color: var(--status-live); }
+.alert-toast-success::before { background: var(--status-live); }
+.alert-toast-success .alert-toast-icon { color: var(--status-live); }
+.alert-toast-success .alert-toast-body { color: var(--status-live); }
+
 /* Warn: slow ~2s caution pulse on the left border only. */
 .alert-toast-warn {
   border-left-color: var(--status-stale);
@@ -141,6 +157,32 @@
 [data-theme="light"] .alert-toast-warn::before     { opacity: 0.28; }
 [data-theme="light"] .alert-toast-error::before    { opacity: 0.22; }
 [data-theme="light"] .alert-toast-critical::before { opacity: 0.26; }
+
+.alert-progress {
+  position: relative;
+  height: 3px;
+  margin: 0.1rem 0 0.35rem;
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  border-radius: 2px;
+  overflow: hidden;
+}
+.alert-progress-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 200ms ease;
+}
+.alert-progress-indet {
+  width: 35%;
+  animation: alert-progress-sweep 1.1s ease-in-out infinite;
+}
+@keyframes alert-progress-sweep {
+  0%   { left: -35%; }
+  100% { left: 100%; }
+}
 
 .alert-toast-meta {
   position: relative;

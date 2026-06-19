@@ -13,7 +13,7 @@ from typing import Any
 import nats
 import psutil
 import uvicorn
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -386,10 +386,17 @@ def build_app(
     if vite_url is not None:
         # Dev mode: redirect SPA traffic to Vite. Catch-all, but the API routes
         # above take precedence since they register first.
+        from urllib.parse import urlsplit
+
+        # Redirect to the request's own host (not localhost) so a LAN client is
+        # sent to Vite on the server, not its own machine.
+        vite_port = urlsplit(vite_url).port
+
         @app.get("/", include_in_schema=False)
         @app.get("/{path:path}", include_in_schema=False)
-        def redirect_to_vite(path: str = "") -> RedirectResponse:
-            return RedirectResponse(f"{vite_url}/{path}")
+        def redirect_to_vite(request: Request, path: str = "") -> RedirectResponse:
+            host = request.url.hostname or "localhost"
+            return RedirectResponse(f"http://{host}:{vite_port}/{path}")
     elif frontend_dist.exists():
         # Must register after the WS and API routes; html=True makes this a
         # catch-all serving index.html for unmatched paths.
@@ -413,7 +420,7 @@ def serve(app: FastAPI, port: int) -> tuple[uvicorn.Server, threading.Thread]:
     server.should_exit = True and joining the returned thread."""
     config = uvicorn.Config(
         app,
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=port,
         log_config=None,
         access_log=False,
