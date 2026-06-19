@@ -13,6 +13,12 @@ export interface StreamResult<T> {
   lastSeen: number | null;
 }
 
+// Empty tokens ("..", leading/trailing dot) are invalid on NATS and drop the
+// whole connection if subscribed, so treat them as nothing to subscribe.
+function subscribable(subject: string): boolean {
+  return subject.length > 0 && !subject.split('.').includes('');
+}
+
 export function useStream<S extends SubjectUnion>(
   subject: S,
 ): StreamResult<SubjectPayload<S>> {
@@ -22,6 +28,10 @@ export function useStream<S extends SubjectUnion>(
   }));
 
   useEffect(() => {
+    if (!subscribable(subject)) {
+      setState({ value: null, lastSeen: null });
+      return;
+    }
     // On subject change, warm-start from the WS-bridge cache if a value is
     // there, else reset to {null, null}. The real lastSeen flows through so a
     // value cached 30s ago reads as 30s old, not just-arrived.
