@@ -169,21 +169,9 @@ def build_app(
         # is the local leaf node; otherwise the same NATS as everything else.
         # Bounded connect_timeout so a dead NATS fails fast instead of looping
         # reconnects.
-        async def _temp_err_cb(e: Exception) -> None:  # TEMP: root-cause logging
-            log.warn(f"TEMP nats error_cb: {type(e).__name__}: {e}")
-
-        async def _temp_closed_cb() -> None:  # TEMP
-            log.warn("TEMP nats closed_cb: connection closed")
-
-        async def _temp_disconnected_cb() -> None:  # TEMP
-            log.warn("TEMP nats disconnected_cb")
-
         try:
             nc = await nats.connect(
-                nats_url, allow_reconnect=False, connect_timeout=2,
-                error_cb=_temp_err_cb,           # TEMP
-                closed_cb=_temp_closed_cb,       # TEMP
-                disconnected_cb=_temp_disconnected_cb,  # TEMP
+                nats_url, allow_reconnect=False, connect_timeout=2
             )
         except Exception as exc:
             log.warn(f"WS bridge: NATS connect failed at {nats_url}: {exc!r}")
@@ -338,7 +326,6 @@ def build_app(
                 msg = await websocket.receive_json()
                 action = msg.get("action")
                 subject = msg.get("subject")
-                log.info(f"TEMP WS frame: action={action!r} subject={subject!r} key={msg.get('key')!r}")  # TEMP
                 if readonly and action in write_actions:
                     await _send_readonly_error(action)
                     continue

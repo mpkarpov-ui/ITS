@@ -14,7 +14,7 @@ export interface StreamResult<T> {
 }
 
 export function useStream<S extends SubjectUnion>(
-  subject: S,
+  subject: S | null,
 ): StreamResult<SubjectPayload<S>> {
   const [state, setState] = useState<StreamResult<SubjectPayload<S>>>(() => ({
     value: null,
@@ -22,6 +22,11 @@ export function useStream<S extends SubjectUnion>(
   }));
 
   useEffect(() => {
+    // null subject = disabled (e.g. no target selected); subscribe to nothing.
+    if (!subject) {
+      setState({ value: null, lastSeen: null });
+      return;
+    }
     // On subject change, warm-start from the WS-bridge cache if a value is
     // there, else reset to {null, null}. The real lastSeen flows through so a
     // value cached 30s ago reads as 30s old, not just-arrived.

@@ -9,7 +9,8 @@ import { useTarget } from './TargetContext';
 // the resolved subject so views pass it to <Graph> without re-deriving.
 export function useMidasTlm() {
   const { target } = useTarget();
-  const subject = subjects.midasGround.tlm({ midas_id: target });
+  // No target -> subscribe to nothing; an empty midas_id builds an invalid subject.
+  const subject = target ? subjects.midasGround.tlm({ midas_id: target }) : null;
   const stream = useStream(subject);
   return { ...stream, subject };
 }

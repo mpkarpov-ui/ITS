@@ -7,7 +7,7 @@ import { subscribeHistory } from './ws-bridge';
 // subject share one trace. History accumulates from first-subscriber mount;
 // older values aren't reconstructed (that needs JetStream replay).
 export function useHistory<S extends SubjectUnion>(
-  subject: S,
+  subject: S | null,
   n: number = 100,
 ): SubjectPayload<S>[] {
   const [history, setHistory] = useState<SubjectPayload<S>[]>([]);
@@ -16,6 +16,8 @@ export function useHistory<S extends SubjectUnion>(
     // non-empty, so switching to an empty subject would otherwise leave the
     // previous subject's history rendered. The shared buffer is untouched.
     setHistory([]);
+    // null subject = disabled (e.g. no target selected); subscribe to nothing.
+    if (!subject) return;
     return subscribeHistory(subject, (buf) => {
       // Slice to the caller's window; the shared buffer can hold more for
       // components asking for greater depth.
