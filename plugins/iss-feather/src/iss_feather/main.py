@@ -25,12 +25,16 @@ from typing import Any
 import serial
 from pydantic import BaseModel
 
-from its_contracts.iss_feather import CmdResult, MshellCommand
+from its_contracts.iss_feather import Alert, AlertLevel, CmdResult, MshellCommand
 from its_contracts.midas_ground import Tlm
 from its_core.log import get_logger
-from its_sdk import command, publish, source
+from its_sdk import command, every, publish, source
 
 log = get_logger("iss-feather")
+
+# LOS threshold. Real feather Tlm runs ~4Hz per rocket, so 3s is ~12 missed
+# packets, past any transient hiccup.
+TLM_STALE_S = 3.0
 
 # Reply `type`s meaning the command failed; anything else counts as success.
 _ERROR_TYPES = {
@@ -66,10 +70,53 @@ class IssFeather:
         # One mshell line in flight at a time so replies map to their command.
         self._cmd_lock = asyncio.Lock()
         self._diag_logged = False
+        # Per-rocket liveness, touched only on the loop, so no lock. A midas_id
+        # appears only after its first packet, so a never-seen radio never alerts.
+        self._last_ms: dict[str, int] = {}              # midas_id -> last seen ms
+        self._alert_state: dict[str, str] = {}          # midas_id -> "live"|"stale"
 
     @publish("tlm", path="{midas_id}.tlm")
     async def emit_tlm(self, midas_id: str, packet: Tlm) -> Tlm:
+        # Runs on the loop (scheduled from the reader thread), as does the
+        # watchdog, so the liveness dicts need no lock.
+        self._last_ms[midas_id] = int(time.time() * 1000)
+        if self._alert_state.get(midas_id) == "stale":
+            log.info(f"{midas_id}: telemetry recovered")
+            await self.emit_alert(key=self._alert_key(midas_id), cleared=True)
+            self._alert_state[midas_id] = "live"
         return packet
+
+    @publish("alert")
+    async def emit_alert(
+        self,
+        level: AlertLevel = AlertLevel.INFO,
+        title: str = "",
+        body: str = "",
+        key: str | None = None,
+        cleared: bool = False,
+    ) -> Alert:
+        return Alert(level=level, title=title, body=body, key=key, cleared=cleared)
+
+    def _alert_key(self, midas_id: str) -> str:
+        # Sticky key per (channel, rocket) so recovery clears the same toast.
+        return f"iss_feather_tlm_silent_{self.config.channel}_{midas_id}"
+
+    @every("1s")
+    async def _watchdog(self) -> None:
+        now = int(time.time() * 1000)
+        # Snapshot: emit_alert below awaits, letting a new rocket's first packet
+        # insert into _last_ms mid-iteration.
+        for midas_id, last_ms in list(self._last_ms.items()):
+            age_s = (now - last_ms) / 1000
+            if age_s >= TLM_STALE_S and self._alert_state.get(midas_id) != "stale":
+                log.warn(f"{midas_id}: LOS ({int(age_s)}s since last Tlm)")
+                await self.emit_alert(
+                    level=AlertLevel.WARN,
+                    key=self._alert_key(midas_id),
+                    title=f"LOS detected on {midas_id}",
+                    body=f"No telemetry for {int(TLM_STALE_S)}s.",
+                )
+                self._alert_state[midas_id] = "stale"
 
     @publish("cmd_result")
     async def emit_cmd_result(

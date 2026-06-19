@@ -24,6 +24,11 @@ path = "{midas_id}.tlm"
 [[publishes]]
 stream = "cmd_result"
 
+# LOS watchdog: one sticky WARN alert per rocket (midas_id) when its telemetry
+# stops for >3s, cleared on the next packet.
+[[publishes]]
+stream = "alert"
+
 # Raw MShell passthrough: operators send a literal command line (e.g. "fire 42
 # A", "safe 7", "frequency 0 set 421.15") and get the feather's reply lines
 # back. Bidirectional per-instance request/reply on
