@@ -15,7 +15,6 @@ import psutil
 import uvicorn
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
 
 from its_core.log import get_logger
 from its_core.plugins import PluginManifest
@@ -398,9 +397,24 @@ def build_app(
             host = request.url.hostname or "localhost"
             return RedirectResponse(f"http://{host}:{vite_port}/{path}")
     elif frontend_dist.exists():
-        # Must register after the WS and API routes; html=True makes this a
-        # catch-all serving index.html for unmatched paths.
-        app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="spa")
+        # SPA fallback: serve a real file when one exists, else index.html so the
+        # client router resolves deep links (e.g. /overlay, the OBS browser
+        # source) on hard load/refresh. StaticFiles(html=True) only serves
+        # index.html at the root and 404s nested routes, which breaks direct
+        # loads. Registered after the WS/API routes, so those still win.
+        from fastapi.responses import FileResponse
+
+        dist_root = frontend_dist.resolve()
+        index_file = dist_root / "index.html"
+
+        @app.get("/{path:path}", include_in_schema=False)
+        def spa(path: str) -> FileResponse:
+            candidate = (dist_root / path).resolve()
+            # Real file inside dist/ -> serve it; anything else -> SPA entry.
+            # The parents check blocks path-traversal escapes (../).
+            if path and dist_root in candidate.parents and candidate.is_file():
+                return FileResponse(candidate)
+            return FileResponse(index_file)
     else:
         @app.get("/")
         def no_frontend() -> JSONResponse:
